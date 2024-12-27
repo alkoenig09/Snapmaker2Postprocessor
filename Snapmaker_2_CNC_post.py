@@ -10,21 +10,35 @@ import base64
 import tempfile
 from typing import Union
 
+import FreeCAD
+import Path
+
+def compare_versions(v1, v2):
+    parts1 = [int(part) for part in v1.split('.')]
+    parts2 = [int(part) for part in v2.split('.')]
+
+    for p1, p2 in zip(parts1, parts2):
+        if p1 < p2:
+            return -1
+        elif p1 > p2:
+            return 1
+
+    return 0
+
 try:
-    import FreeCAD
-    import Path
-    if int(FreeCAD.Version()[1]) < 21:
+    print("Snapmaker")
+    if compare_versions(FreeCAD.Version()[1], "0.21.0") == -1:
+        print("Snapmaker <0.21")
         import PathScripts.PathUtil as PathUtil
         import PathScripts.PostUtils as PostUtils
         import PathScripts.PathJob as PathJob
     else:
+        print("Snapmaker >0.21")
         import Path.Base.Util as PathUtil
         import Path.Post.Utils as PostUtils
         import Path.Main.Job as PathJob
-except ImportError:
-    print('FreeCAD modules could not be imported. Only help is available')
-    FreeCAD = None
-    Path = None
+except ImportError as e:
+    print('FreeCAD modules could not be imported. Only help is available:\n%s', e)
     PathUtil = None
     PostUtils = None
     PathJob = None
